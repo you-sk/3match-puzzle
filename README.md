@@ -2,6 +2,10 @@
 
 ブラウザで動作するカラフルな3マッチパズルゲームです。同じ色の宝石を3つ以上並べて消していくシンプルながら奥深いゲームです。
 
+![image](https://github.com/user-attachments/assets/861533b1-223b-43a6-86bb-d31aace35ba6)
+
+https://you-sk.github.io/3match-puzzle/
+
 ## 特徴
 
 ### ゲームプレイ
