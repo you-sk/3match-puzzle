@@ -210,11 +210,21 @@ function removeMatches(matches) {
     const gems = document.querySelectorAll('.gem');
     matches.forEach(([row, col]) => {
         const index = row * BOARD_SIZE + col;
-        gems[index].classList.add('removing');
+        const gem = gems[index];
+        gem.classList.add('removing');
+        
+        // パーティクルエフェクトを生成
+        createParticles(gem);
+        
         board[row][col] = null;
     });
     
-    score += matches.length * 10;
+    const scoreGain = matches.length * 10;
+    score += scoreGain;
+    
+    // スコアポップアップを表示
+    showScorePopup(scoreGain, matches[0]);
+    
     updateScore();
     checkLevelUp();
     playMatchSound(matches.length);
@@ -455,6 +465,94 @@ function resetGame() {
     updateScore();
     createBoard();
     renderBoard();
+}
+
+function createParticles(gemElement) {
+    const rect = gemElement.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    
+    // 12個のパーティクルを生成
+    for (let i = 0; i < 12; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle sparkle';
+        
+        // ランダムな方向と距離
+        const angle = Math.random() * Math.PI * 2;
+        const distance = 20 + Math.random() * 40;
+        const velocity = 2 + Math.random() * 3;
+        
+        particle.style.left = centerX + 'px';
+        particle.style.top = centerY + 'px';
+        
+        // ランダムなサイズ
+        const size = 4 + Math.random() * 8;
+        particle.style.width = size + 'px';
+        particle.style.height = size + 'px';
+        
+        // ランダムな色
+        const colors = ['#ffd700', '#ff6b6b', '#4dabf7', '#51cf66', '#9775fa', '#ff922b'];
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        particle.style.background = `radial-gradient(circle, #fff, ${color})`;
+        
+        document.body.appendChild(particle);
+        
+        // アニメーション
+        const startTime = performance.now();
+        const duration = 800 + Math.random() * 400;
+        
+        function animateParticle(currentTime) {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            
+            const currentX = centerX + Math.cos(angle) * distance * progress;
+            const currentY = centerY + Math.sin(angle) * distance * progress - (progress * progress * 30);
+            const opacity = 1 - progress;
+            const scale = 1 - progress * 0.5;
+            
+            particle.style.left = currentX + 'px';
+            particle.style.top = currentY + 'px';
+            particle.style.opacity = opacity;
+            particle.style.transform = `scale(${scale})`;
+            
+            if (progress < 1) {
+                requestAnimationFrame(animateParticle);
+            } else {
+                if (particle.parentNode) {
+                    particle.parentNode.removeChild(particle);
+                }
+            }
+        }
+        
+        requestAnimationFrame(animateParticle);
+    }
+}
+
+function showScorePopup(scoreGain, matchPosition) {
+    const [row, col] = matchPosition;
+    const gameBoard = document.getElementById('game-board');
+    const boardRect = gameBoard.getBoundingClientRect();
+    
+    // ゲームボード内の位置を計算
+    const cellWidth = boardRect.width / BOARD_SIZE;
+    const cellHeight = boardRect.height / BOARD_SIZE;
+    const x = boardRect.left + (col * cellWidth) + (cellWidth / 2);
+    const y = boardRect.top + (row * cellHeight) + (cellHeight / 2);
+    
+    const popup = document.createElement('div');
+    popup.className = 'score-popup';
+    popup.textContent = '+' + scoreGain;
+    popup.style.left = x + 'px';
+    popup.style.top = y + 'px';
+    
+    document.body.appendChild(popup);
+    
+    // ポップアップを削除
+    setTimeout(() => {
+        if (popup.parentNode) {
+            popup.parentNode.removeChild(popup);
+        }
+    }, 1500);
 }
 
 loadHighScore();
